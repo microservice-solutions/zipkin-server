@@ -1,5 +1,7 @@
 # zipkin-server
 
+![Deploy to IKS](https://img.shields.io/github/workflow/status/microservice-solutions/zipkin-server/Deploy%20to%20IKS?label=Deploy%20to%20IKS)
+
 The zipkin docker image is provided by zipkin community itself.\
 The same docker image is used for the zipkin server purpose.
 
