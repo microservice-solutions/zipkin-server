@@ -5,5 +5,7 @@ metadata:
 spec:
   selector:
     app: zipkin-server
+  type: NodePort
   ports:
   - port: 9411
+    nodePort:30050
