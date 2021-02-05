@@ -1,12 +1,11 @@
-# This workflow will build a docker container, publish it to IBM Container Registry, and deploy it to IKS when a release is created
+# This workflow will deploy it to IKS when a release is created
 #
 # To configure this workflow:
 #
-# 1. Ensure that your repository contains a Dockerfile
-# 2. Setup secrets in your repository by going to settings: Create ICR_NAMESPACE and IBM_CLOUD_API_KEY
-# 3. Change the values for the IBM_CLOUD_REGION, REGISTRY_HOSTNAME, IMAGE_NAME, IKS_CLUSTER, DEPLOYMENT_NAME, and PORT
+# 1. Setup secrets in your repository by going to settings: Create ICR_NAMESPACE and IBM_CLOUD_API_KEY
+# 2. Change the values for the IBM_CLOUD_REGION, REGISTRY_HOSTNAME, IMAGE_NAME, IKS_CLUSTER, DEPLOYMENT_NAME, and PORT
 
-name: Build and Deploy to IKS
+name: Deploy to IKS
 
 on:
   release:
@@ -14,15 +13,15 @@ on:
 
 # Environment variables available to all jobs and steps in this workflow
 env:
-  GITHUB_SHA: ${{ github.sha }}
+  #GITHUB_SHA: ${{ github.sha }}
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
   IBM_CLOUD_REGION: us-south
   #ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
   #REGISTRY_HOSTNAME: us.icr.io
   IMAGE_NAME: zipkin-server
-  IKS_CLUSTER: example-iks-cluster-name-or-id
+  IKS_CLUSTER: c0duuo5f030t1uf54a4g
   DEPLOYMENT_NAME: zipkin-server
-  PORT: 5001
+  PORT: 27329
 
 jobs:
   setup-build-publish-deploy:
@@ -50,25 +49,25 @@ jobs:
         ibmcloud cr login
 
     # Build the Docker image
-    - name: Build with Docker
-      run: |
-        docker build -t "$REGISTRY_HOSTNAME"/"$ICR_NAMESPACE"/"$IMAGE_NAME":"$GITHUB_SHA" \
-          --build-arg GITHUB_SHA="$GITHUB_SHA" \
-          --build-arg GITHUB_REF="$GITHUB_REF" .
+    #- name: Build with Docker
+    #  run: |
+    #    docker build -t "$REGISTRY_HOSTNAME"/"$ICR_NAMESPACE"/"$IMAGE_NAME":"$GITHUB_SHA" \
+    #      --build-arg GITHUB_SHA="$GITHUB_SHA" \
+    #      --build-arg GITHUB_REF="$GITHUB_REF" .
 
     # Push the image to IBM Container Registry
-    - name: Push the image to ICR
-      run: |
-        docker push $REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
+    #- name: Push the image to ICR
+    #  run: |
+    #    docker push $REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
 
     # Deploy the Docker image to the IKS cluster
     - name: Deploy to IKS
       run: |
         ibmcloud ks cluster config --cluster $IKS_CLUSTER
         kubectl config current-context
-        kubectl create deployment $DEPLOYMENT_NAME --image=$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA --dry-run -o yaml > deployment.yaml
-        kubectl apply -f deployment.yaml
+        #kubectl create deployment $DEPLOYMENT_NAME --image=$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA --dry-run -o yaml > deployment.yaml
+        kubectl apply -f ./k8s/deployment.yaml
         kubectl rollout status deployment/$DEPLOYMENT_NAME
-        kubectl create service loadbalancer $DEPLOYMENT_NAME --tcp=80:$PORT --dry-run -o yaml > service.yaml
-        kubectl apply -f service.yaml
+        #kubectl create service loadbalancer $DEPLOYMENT_NAME --tcp=80:$PORT --dry-run -o yaml > service.yaml
+        kubectl apply -f ./k8sservice.yaml
         kubectl get services -o wide
