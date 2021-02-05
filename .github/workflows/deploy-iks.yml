@@ -24,8 +24,8 @@ env:
   PORT: 27329
 
 jobs:
-  setup-build-publish-deploy:
-    name: Setup, Build, Publish, and Deploy
+  setup-deploy:
+    name: IKS Deploy
     runs-on: ubuntu-latest
     steps:
 
