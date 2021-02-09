@@ -8,4 +8,5 @@ spec:
   type: NodePort
   ports:
   - port: 9411
+    targetPort: 9411
     nodePort: 30011
