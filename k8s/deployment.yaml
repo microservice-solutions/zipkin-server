@@ -17,7 +17,7 @@ spec:
         image: openzipkin/zipkin-slim:latest
         resources:
           limits:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "512Mi"
+            cpu: "500m"
         ports:
         - containerPort: 9411
